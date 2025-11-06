@@ -20,6 +20,12 @@ class Program
             { true , true , true , true  },
             { false, false, false, false },
             { false, false, false, false },
+        },
+        new[,]
+        {
+            { true , false, false },
+            { true , true , true  },
+            { false, false, false }
         }
     ];
 
@@ -56,7 +62,7 @@ class Program
         if (_currentTetrino is null)
         {
             var random = new Random();
-            _currentTetrino = new Tetromino(TetrinoLayouts[random.NextInt64(0, 4)]);
+            _currentTetrino = new Tetromino(TetrinoLayouts[1]);
             // _tetrinos.Add(_currentTetrino);
             
             Task.Run(() =>
@@ -143,7 +149,7 @@ class Program
         {
             for (var x = 0; x < _currentTetrino.Width; x++)
             {
-                if (_currentTetrino.LayoutMatrix[x, y])
+                if (_currentTetrino.LayoutMatrix[y, x])
                 {
                     _renderBuffer[_currentTetrino.X + x, _currentTetrino.Y + y] = '+';
                 }
