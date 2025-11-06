@@ -30,7 +30,6 @@ class Program
     ];
 
     private static char[,] _renderBuffer = new char[CanvasWidth, CanvasHeight];
-    // private static List<Tetromino> _tetrinos = [];
     private static Tetromino? _currentTetrino;
     private static bool _moveBlock = true;
     
@@ -47,23 +46,19 @@ class Program
 
     private static void Setup()
     {
-        // for (var i = 0; i < _columnTopOccupiedPosition.Length; i++)
-        // {
-            // _columnTopOccupiedPosition[i] = 0;
-        // }
-        
         Console.CursorVisible = false;
         Console.Clear();
     }
 
     private static void ProcessGameLogic()
     {
+        ClearCurrentTetrominoFromBoard();
+        
         // Spawn a block if one doesn't already exist
         if (_currentTetrino is null)
         {
             var random = new Random();
             _currentTetrino = new Tetromino(TetrinoLayouts[1]);
-            // _tetrinos.Add(_currentTetrino);
             
             Task.Run(() =>
             {
@@ -80,12 +75,27 @@ class Program
             {
                 case ConsoleKey.RightArrow:
                 {
-                    // if (_currentTetrino.RightPosition == CanvasWidth)
-                    // {
-                        // break;
-                    // }
+                    var onBorder = false;
+                    LoopTetrominoLayout((x, y) =>
+                    {
+                        if (_currentTetrino.LayoutMatrix[y, x])
+                        {
+                            if (_currentTetrino.X + x == CanvasWidth - 1)
+                            {
+                                onBorder = true;
+                                return false;
+                            }
+                        }
 
-                    // _currentTetrino.X++;
+                        return true;
+                    });
+
+                    if (onBorder)
+                    {
+                        return;
+                    }
+
+                    _currentTetrino.X++;
                     break;
                 }
                 case ConsoleKey.UpArrow:
@@ -133,6 +143,38 @@ class Program
                 // });
             }
         }
+    }
+
+    private static void LoopTetrominoLayout(Func<int, int, bool> action)
+    {
+        for (var y = 0; y < _currentTetrino.Height; y++)
+        {
+            for (var x = 0; x < _currentTetrino.Width; x++)
+            {
+                if (!action(x, y))
+                {
+                    return;
+                }
+            }
+        }
+    }
+    
+    private static void ClearCurrentTetrominoFromBoard()
+    {
+        if (_currentTetrino is null)
+        {
+            return;
+        }
+        
+        LoopTetrominoLayout((x, y) =>
+        {
+            if (_currentTetrino.LayoutMatrix[x, y])
+            {
+                _renderBuffer[x, y] = EmptySpaceCharacter;
+            }
+
+            return true;
+        });
     }
 
     private static void Render()
