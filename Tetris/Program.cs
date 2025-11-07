@@ -9,6 +9,10 @@ class Program
     public static readonly char EmptySpaceCharacter = '\0';
     public static readonly int CanvasWidth = 10;
     public static readonly int CanvasHeight = 20;
+    
+    public static int TerminalWidth = Console.BufferWidth;
+    public static int TerminalHeight = Console.BufferHeight;
+    
     public static int FrameCount = 0;
     public static int FramesPerSecond = 0;
 
@@ -47,24 +51,39 @@ class Program
     private static void Render()
     {
         FrameCount++;
+
+        if (Console.BufferWidth != TerminalWidth || Console.BufferHeight != TerminalHeight)
+        {
+            TerminalWidth = Console.BufferWidth;
+            TerminalHeight = Console.BufferHeight;
+            Console.Clear();
+        }
         
         Console.SetCursorPosition(0, 0);
-        for (var y = 0; y < Game.GameBoard.GetLength(1); y++)
+        if (Console.BufferWidth <= CanvasWidth || Console.BufferHeight <= CanvasHeight + 2)
         {
-            for (var x = 0; x < Game.GameBoard.GetLength(0); x++)
+            Console.WriteLine("Window too small.");
+        }
+        else
+        {
+            for (var y = 0; y < Game.GameBoard.GetLength(1); y++)
             {
-                if (Game.GameBoard[x, y])
+                for (var x = 0; x < Game.GameBoard.GetLength(0); x++)
                 {
-                    Console.Write(BlockCharacter);
-                    continue;
-                }
+                    if (Game.GameBoard[x, y])
+                    {
+                        Console.Write(BlockCharacter);
+                        continue;
+                    }
                 
-                Console.Write('.');
-            }
+                    Console.Write('.');
+                }
 
-            Console.WriteLine();
+                Console.WriteLine();
+            }
         }
 
         Console.WriteLine($"FPS: {FramesPerSecond} | GLUPS: {Game.GameLogicUpdatesPerSecond}");
+        Console.WriteLine($"W: {Console.BufferWidth} | H: {Console.BufferHeight}");
     }
 }
