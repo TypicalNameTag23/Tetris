@@ -1,19 +1,26 @@
-yet another tetris clone written from scratch in c#
-- has basic movement:
-    left arrow  -> move left
-    right arrow -> move right
-    up arrow    -> rotate
-    down arrow  -> move down
-    space       -> move bottom
-- has game over condition
-- has row clearing
-- "adapts" to terminal size
+# Yet Another Tetris Clone
+Yet another simple clone of Tetris written in C#
 
-todo:
-- kicks
-- score tracking
-- next piece preview
-- improve ui
-- colored blocks
-- proper game over and start screens
-- block placement preview
+## Controls
+- Left/Right/Down Arrow: Move piece left, right, or downwards.
+- Up Arrow: Rotate piece clockwise.
+- Space: Move piece as far down as it can go.
+
+## Build and Run
+```
+git clone https://github.com/TypicalNameTag23/Tetris.git
+cd Tetris
+dotnet run
+```
+
+### Todo
+- Score Tracking
+- Levels
+- Kicks
+- Piece Holding
+- Counter-clockwise Rotations 
+- Improve UI
+  - Next Piece Preview
+  - Colored Blocks
+  - Proper Game Over and Start Screens
+  - Block Placement Preview
