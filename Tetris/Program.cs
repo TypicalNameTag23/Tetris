@@ -16,6 +16,8 @@ class Program
     public static int FrameCount = 0;
     public static int FramesPerSecond = 0;
 
+    public static Game Game; 
+
     private static char[,] _renderBuffer = new char[CanvasWidth, CanvasHeight];
     
     static void Main()
@@ -32,6 +34,8 @@ class Program
     {
         Console.CursorVisible = false;
         Console.Clear();
+        
+        Game = new Game();
         new Thread(() =>
         {
             while (true)
@@ -45,7 +49,7 @@ class Program
             }
         }).Start();
 
-        Game.StartGameLoop();
+        Game.Start();
     }
     
     private static void Render()

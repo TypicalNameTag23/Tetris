@@ -6,9 +6,9 @@ public class TetrominoLayout
     private bool[,] _layoutMatrix;
     private int? initialOffet;
 
-    private int LayoutWidth => _layoutMatrix.GetLength(0);
+    public int LayoutWidth => _layoutMatrix.GetLength(0);
     
-    private int LayoutHeight => _layoutMatrix.GetLength(1);
+    public int LayoutHeight => _layoutMatrix.GetLength(1);
 
     public TetrominoLayout(bool[,] layoutMatrix)
     {
