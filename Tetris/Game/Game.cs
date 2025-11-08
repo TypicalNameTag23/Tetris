@@ -6,24 +6,67 @@ public class Game
     private static readonly bool[][,] TetrinoLayouts =
     [
         new[,]
-        {
-            { false, true , false, false },
+        {     // X Coords
+/*Y Coords*/{ false, true , false, false },
             { false, true , false, false },
             { false, true , false, false },
             { false, true , false, false }
         },
-        // new[,]
-        // {
-        //     { true , false, false },
-        //     { true , true , true  },
-        //     { false, false, false }
-        // }
+        new[,]
+        {
+            { true , true, false },
+            { false, true, false },
+            { false, true, false }
+        },
+        new[,]
+        {
+            { false, true, false },
+            { false, true, false },
+            { true , true, false }
+        },
+        new[,]
+        {
+            { true, true},
+            { true, true}
+        },
+        new[,]
+        {
+            { false, true , false },
+            { true , true , false },
+            { true , false, false }
+        },
+        new[,]
+        {
+            { false, true , false },
+            { true , true , false },
+            { false, true , false }
+        },
+        new[,]
+        {
+            { true , false, false },
+            { true , true , false },
+            { false, true , false }
+        }
     ];
 
     private readonly bool[,] _gameBoard = new bool[Program.CanvasWidth, Program.CanvasHeight];
-    private Tetromino _currentTetrino;
     private GameState _gameState = GameState.Inactive;
+    private Tetromino _currentTetrino;
+    private Timer _gravityTimer;
+    private Random _random;
 
+    public Game(int? seed = null)
+    {
+        if (seed is not null)
+        {
+            _random = new Random((int) seed);
+        }
+        else
+        {
+            _random = new Random();
+        }
+    }
+    
     public bool[,] GameBoard => _gameBoard;
     
     public int GameLogicUpdates { get; set; } = 0;
@@ -44,7 +87,7 @@ public class Game
         SpawnTetromino();
         new Thread(() =>
         {
-            using var timer = new Timer(
+            _gravityTimer = new Timer(
                 _ => Gravity(), 
                 null, 
                 MillisBetweenGravityMovements, 
@@ -108,6 +151,19 @@ public class Game
                     AddCurrentTetrominoToGameBoard();
                     break;
                 }
+                case ConsoleKey.Spacebar:
+                {
+                    RemoveCurrentTetrominoFromGameBoard();
+                    while (IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) =>
+                               y + 1 < Program.CanvasHeight &&
+                               !_gameBoard[x, y + 1]))
+                    {
+                        _currentTetrino.Y++;
+                    }
+
+                    AddCurrentTetrominoToGameBoard();
+                    break;
+                }
                 case ConsoleKey.UpArrow:
                 {
                     RemoveCurrentTetrominoFromGameBoard();
@@ -136,15 +192,12 @@ public class Game
     {
         GameLogicUpdates++;
         RemoveCurrentTetrominoFromGameBoard();
-        // Check if we are as far down as we can go
         if (!IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) =>
                 y + 1 < Program.CanvasHeight
                 && !_gameBoard[x, y + 1]))
         {
-            // If so, add the current tetromino to the board and forget about it
             AddCurrentTetrominoToGameBoard();
-            
-            // And spawn a new tetromiono
+            ClearFilledLines();
             SpawnTetromino();
         }
         else
@@ -155,15 +208,60 @@ public class Game
     }
 
     /// <summary>
+    /// Clears all lines filled by the current tetrino
+    /// </summary>
+    private void ClearFilledLines()
+    {
+        var checkedYCoords = new HashSet<int>();
+        foreach (var relativeBlockPosition in _currentTetrino.RelativeBlockLayout)
+        {
+            var y = _currentTetrino.Y + relativeBlockPosition[1];
+            if (!checkedYCoords.Add(y))
+            {
+                continue;
+            }
+
+            var clearRow = true;
+            for (var x = 0; x < Program.CanvasWidth; x++)
+            {
+                if (!_gameBoard[x, y])
+                {
+                    clearRow = false;
+                    break;
+                }
+            }
+
+            if (clearRow)
+            {
+                for (; y > -1; y--)
+                {
+                    for (var x = 0; x < Program.CanvasWidth; x++)
+                    {
+                        if (y != 0)
+                        {
+                            _gameBoard[x, y] = _gameBoard[x, y - 1];
+                        }
+                        else
+                        {
+                            _gameBoard[x, y] = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Tries to spawn a tetromino and ends the game if it can't find a valid space
     /// </summary>
     private void SpawnTetromino()
     {
-        _currentTetrino = new Tetromino(TetrinoLayouts[0]);
+        _currentTetrino = new Tetromino(TetrinoLayouts[_random.NextInt64(TetrinoLayouts.Length)]);
         _currentTetrino.X = _gameBoard.GetLength(0) / 2 - _currentTetrino.TetrominoLayout.LayoutWidth / 2;
         if (!IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) => !_gameBoard[x, y]))
         {
             _gameState = GameState.GameOver;
+            _gravityTimer.Dispose();
             return;
         }
 

@@ -87,7 +87,13 @@ class Program
             }
         }
 
-        Console.WriteLine($"FPS: {FramesPerSecond} | GLUPS: {Game.GameLogicUpdatesPerSecond}");
+        PrintAndClear($"FPS: {FramesPerSecond} | GLUPS: {Game.GameLogicUpdatesPerSecond}");
         Console.WriteLine($"W: {Console.BufferWidth} | H: {Console.BufferHeight}");
+    }
+
+    public static void PrintAndClear(string s)
+    {
+        var padding = TerminalWidth - s.Length;
+        Console.WriteLine(padding > 0 ? s.PadRight(padding, ' ') : s);
     }
 }
