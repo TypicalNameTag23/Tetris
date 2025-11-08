@@ -1,4 +1,4 @@
-namespace Tetris;
+namespace Tetris.Game;
 
 public enum GameState
 {

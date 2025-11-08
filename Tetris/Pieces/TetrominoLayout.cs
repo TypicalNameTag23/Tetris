@@ -1,4 +1,4 @@
-namespace Tetris;
+namespace Tetris.Pieces;
 
 public class TetrominoLayout
 {

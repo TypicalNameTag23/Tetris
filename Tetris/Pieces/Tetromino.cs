@@ -1,8 +1,7 @@
-namespace Tetris;
+namespace Tetris.Pieces;
 
 public class Tetromino(bool[,] layoutMatrix)
 {
-    // ReSharper disable once FieldCanBeMadeReadOnly.Local
     private int[] _coords = [0, 0];
     
     public TetrominoLayout TetrominoLayout { get; set; } = new(layoutMatrix);

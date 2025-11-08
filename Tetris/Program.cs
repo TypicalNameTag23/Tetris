@@ -16,7 +16,7 @@ class Program
     public static int FrameCount = 0;
     public static int FramesPerSecond = 0;
 
-    public static Game Game; 
+    public static Game.Game Game; 
 
     private static char[,] _renderBuffer = new char[CanvasWidth, CanvasHeight];
     
@@ -35,7 +35,7 @@ class Program
         Console.CursorVisible = false;
         Console.Clear();
         
-        Game = new Game();
+        Game = new Game.Game();
         new Thread(() =>
         {
             while (true)
@@ -55,7 +55,6 @@ class Program
     private static void Render()
     {
         FrameCount++;
-
         if (Console.BufferWidth != TerminalWidth || Console.BufferHeight != TerminalHeight)
         {
             TerminalWidth = Console.BufferWidth;
@@ -88,7 +87,7 @@ class Program
         }
 
         PrintAndClear($"FPS: {FramesPerSecond} | GLUPS: {Game.GameLogicUpdatesPerSecond}");
-        Console.WriteLine($"W: {Console.BufferWidth} | H: {Console.BufferHeight}");
+        PrintAndClear($"W: {Console.BufferWidth} | H: {Console.BufferHeight}");
     }
 
     public static void PrintAndClear(string s)

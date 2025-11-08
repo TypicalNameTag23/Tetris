@@ -1,4 +1,4 @@
-namespace Tetris;
+namespace Tetris.Game;
 
 public class Game
 {
@@ -51,7 +51,7 @@ public class Game
 
     private readonly bool[,] _gameBoard = new bool[Program.CanvasWidth, Program.CanvasHeight];
     private GameState _gameState = GameState.Inactive;
-    private Tetromino _currentTetrino;
+    private Pieces.Tetromino _currentTetrino;
     private Timer _gravityTimer;
     private Random _random;
 
@@ -69,9 +69,9 @@ public class Game
     
     public bool[,] GameBoard => _gameBoard;
     
-    public int GameLogicUpdates { get; set; } = 0;
+    public int GameLogicUpdates { get; set; }
 
-    public int GameLogicUpdatesPerSecond { get; set; } = 0;
+    public int GameLogicUpdatesPerSecond { get; set; }
     
     /// <summary>
     /// Starts the game if it isn't currently active.
@@ -256,7 +256,7 @@ public class Game
     /// </summary>
     private void SpawnTetromino()
     {
-        _currentTetrino = new Tetromino(TetrinoLayouts[_random.NextInt64(TetrinoLayouts.Length)]);
+        _currentTetrino = new Pieces.Tetromino(TetrinoLayouts[_random.NextInt64(TetrinoLayouts.Length)]);
         _currentTetrino.X = _gameBoard.GetLength(0) / 2 - _currentTetrino.TetrominoLayout.LayoutWidth / 2;
         if (!IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) => !_gameBoard[x, y]))
         {
