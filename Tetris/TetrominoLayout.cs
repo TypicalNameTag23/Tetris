@@ -4,7 +4,8 @@ public class TetrominoLayout
 {
     private List<int[]> _relativeBlockLayout = [];
     private bool[,] _layoutMatrix;
-    
+    private int? initialOffet;
+
     private int LayoutWidth => _layoutMatrix.GetLength(0);
     
     private int LayoutHeight => _layoutMatrix.GetLength(1);
@@ -72,20 +73,25 @@ public class TetrominoLayout
     private void UpdateRelativeLayout()
     {
         _relativeBlockLayout.Clear();
-        
-        int? yOffset = 0;
+
+        var offset = true;
         for (var y = 0; y < LayoutHeight; y++)
         {
             for (var x = 0; x < LayoutWidth; x++)
             {
                 if (_layoutMatrix[x, y])
                 {
-                    // if (yOffset is null)
-                    // {
-                        // yOffset = y;
-                    // }
+                    if (initialOffet is null) // hack
+                    {
+                        initialOffet = y;
+                    }
+
+                    if (y == 0)
+                    {
+                        offset = false;
+                    }
                     
-                    _relativeBlockLayout.Add([x, y - (int) yOffset]);
+                    _relativeBlockLayout.Add([x, y - (offset ? (int) initialOffet : 0)]);
                 }
             }
         }
