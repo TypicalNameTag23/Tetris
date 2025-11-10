@@ -6,14 +6,7 @@ Yet another simple clone of Tetris written in C#
 - Up Arrow: Rotate piece clockwise.
 - Space: Move piece as far down as it can go.
 
-## Build and Run
-```
-git clone https://github.com/TypicalNameTag23/Tetris.git
-cd Tetris
-dotnet run
-```
-
-### Todo
+## Todo
 - Score Tracking
 - Levels
 - Kicks
