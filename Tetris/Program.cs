@@ -14,6 +14,7 @@ static class Program
         };
 
         Application.Window = window;
+        Application.TargetFps = 10;
         Application.Start();
     }
     
