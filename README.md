@@ -1,4 +1,5 @@
 # Yet Another Tetris Clone
+![Gameplay preview](Files/gameplay.mp4)
 Yet another simple clone of Tetris written in C#
 
 ## Controls

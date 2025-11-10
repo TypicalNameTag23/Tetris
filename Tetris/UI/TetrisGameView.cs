@@ -8,7 +8,6 @@ namespace Tetris.UI;
 
 public class TetrisGameView : IDrawable
 {
-    private const char BlockCharacter = '+';
     private const char EmptySpaceCharacter = '.';
     private const string GameWindowSizeTooSmallMessage = "Game window is too small.";
     
