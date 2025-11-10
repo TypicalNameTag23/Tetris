@@ -88,14 +88,11 @@ public class TetrisGame
         _gameState = GameState.Playing;
         Application.OnKeyPress += ProcessUserInputs;
         SpawnTetromino();
-        new Thread(() =>
-        {
-            _gravityTimer = new Timer(
-                _ => Gravity(), 
-                null, 
-                MillisBetweenGravityMovements, 
-                MillisBetweenGravityMovements);
-        }).Start();
+        _gravityTimer = new Timer(
+            _ => Gravity(), 
+            null, 
+            MillisBetweenGravityMovements, 
+            MillisBetweenGravityMovements);
     }
 
     /// <summary>
