@@ -1,7 +1,12 @@
+using System.Reflection.Metadata.Ecma335;
+using Painter;
+
 namespace Tetris.Game;
 
-public class Game
+public class TetrisGame
 {
+    public int BoardWidth { get; }
+    public int BoardHeight { get; }
     private const int MillisBetweenGravityMovements = 1000;
     private static readonly bool[][,] TetrinoLayouts =
     [
@@ -49,22 +54,19 @@ public class Game
         }
     ];
 
-    private readonly bool[,] _gameBoard = new bool[Program.CanvasWidth, Program.CanvasHeight];
+    private readonly bool[,] _gameBoard;
     private GameState _gameState = GameState.Inactive;
     private Pieces.Tetromino _currentTetrino;
     private Timer _gravityTimer;
     private Random _random;
 
-    public Game(int? seed = null)
+    public TetrisGame(int boardWidth = 10, int boardHeight = 20, int? seed = null)
     {
-        if (seed is not null)
-        {
-            _random = new Random((int) seed);
-        }
-        else
-        {
-            _random = new Random();
-        }
+        BoardWidth = boardWidth;
+        BoardHeight = boardHeight;
+        _gameBoard = new bool[BoardWidth, BoardHeight];
+        _random = seed is not null ? 
+            new Random((int) seed) : new Random();
     }
     
     public bool[,] GameBoard => _gameBoard;
@@ -84,6 +86,7 @@ public class Game
         }
         
         _gameState = GameState.Playing;
+        Application.OnKeyPress += ProcessUserInputs;
         SpawnTetromino();
         new Thread(() =>
         {
@@ -92,95 +95,92 @@ public class Game
                 null, 
                 MillisBetweenGravityMovements, 
                 MillisBetweenGravityMovements);
-            
-            while (_gameState == GameState.Playing)
-            {
-                ProcessUserInputs();
-            }
         }).Start();
     }
 
     /// <summary>
     /// Processes user movement inputs, counts as a game logic update
     /// </summary>
-    private void ProcessUserInputs()
+    private void ProcessUserInputs(ConsoleKeyInfo key)
     {
-        GameLogicUpdates++;
-        if (Console.KeyAvailable)
+        if (_gameState != GameState.Playing)
         {
-            switch (Console.ReadKey(true).Key)
+            return;
+        }
+        
+        GameLogicUpdates++;
+        switch (key.Key)
+        {
+            case ConsoleKey.RightArrow:
             {
-                case ConsoleKey.RightArrow:
+                RemoveCurrentTetrominoFromGameBoard(); // maybe don't remove the tetromino from the board if we never change it?
+                if (IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) => 
+                        x + 1 < BoardWidth &&
+                        !_gameBoard[x + 1, y]))
                 {
-                    RemoveCurrentTetrominoFromGameBoard(); // maybe don't remove the tetromino from the board if we never change it?
-                    if (IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) => 
-                            x + 1 < Program.CanvasWidth &&
-                            !_gameBoard[x + 1, y]))
-                    {
-                        _currentTetrino.X++;
-                    }
-                    
-                    AddCurrentTetrominoToGameBoard();
-                    break;
+                    _currentTetrino.X++;
                 }
                 
-                case ConsoleKey.LeftArrow:
+                AddCurrentTetrominoToGameBoard();
+                break;
+            }
+            
+            case ConsoleKey.LeftArrow:
+            {
+                RemoveCurrentTetrominoFromGameBoard();
+                if (IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) =>
+                        x - 1 > -1 && 
+                        !_gameBoard[x - 1, y]))
                 {
-                    RemoveCurrentTetrominoFromGameBoard();
-                    if (IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) =>
-                            x - 1 > -1 && 
-                            !_gameBoard[x - 1, y]))
-                    {
-                        _currentTetrino.X--;
-                    }
-                    
-                    AddCurrentTetrominoToGameBoard();
-                    break;
+                    _currentTetrino.X--;
+                }
+                
+                AddCurrentTetrominoToGameBoard();
+                break;
+            }
+
+            case ConsoleKey.DownArrow:
+            {
+                RemoveCurrentTetrominoFromGameBoard();
+                if (IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) =>
+                        y + 1 < BoardHeight && 
+                        !_gameBoard[x, y + 1]))
+                {
+                    _currentTetrino.Y++;
+                }
+                
+                AddCurrentTetrominoToGameBoard();
+                break;
+            }
+            case ConsoleKey.Spacebar:
+            {
+                RemoveCurrentTetrominoFromGameBoard();
+                while (IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) =>
+                           y + 1 < BoardHeight &&
+                           !_gameBoard[x, y + 1]))
+                {
+                    _currentTetrino.Y++;
                 }
 
-                case ConsoleKey.DownArrow:
+                AddCurrentTetrominoToGameBoard();
+                break;
+            }
+            case ConsoleKey.UpArrow:
+            {
+                RemoveCurrentTetrominoFromGameBoard();
+                var rotationLayoutPreview = _currentTetrino.TetrominoLayout.PreviewLayoutAfterRotation();
+                if (IsValidPosition(rotationLayoutPreview.RelativeBlockLayout, (x, y) =>
+                        x < BoardWidth  &&
+                        x > -1          &&
+                        y < BoardHeight && 
+                        y > -1          && 
+                        !_gameBoard[x, y]))
                 {
-                    RemoveCurrentTetrominoFromGameBoard();
-                    if (IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) =>
-                            y + 1 < Program.CanvasHeight && 
-                            !_gameBoard[x, y + 1]))
-                    {
-                        _currentTetrino.Y++;
-                    }
-                    
-                    AddCurrentTetrominoToGameBoard();
-                    break;
+                    _currentTetrino.TetrominoLayout = rotationLayoutPreview;
                 }
-                case ConsoleKey.Spacebar:
-                {
-                    RemoveCurrentTetrominoFromGameBoard();
-                    while (IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) =>
-                               y + 1 < Program.CanvasHeight &&
-                               !_gameBoard[x, y + 1]))
-                    {
-                        _currentTetrino.Y++;
-                    }
-
-                    AddCurrentTetrominoToGameBoard();
-                    break;
-                }
-                case ConsoleKey.UpArrow:
-                {
-                    RemoveCurrentTetrominoFromGameBoard();
-                    var rotationLayoutPreview = _currentTetrino.TetrominoLayout.PreviewLayoutAfterRotation();
-                    if (IsValidPosition(rotationLayoutPreview.RelativeBlockLayout, (x, y) =>
-                            x < Program.CanvasWidth  &&
-                            x > -1                   &&
-                            y < Program.CanvasHeight && 
-                            y > -1                   && 
-                            !_gameBoard[x, y]))
-                    {
-                        _currentTetrino.TetrominoLayout = rotationLayoutPreview;
-                    }
-                    
-                    AddCurrentTetrominoToGameBoard();
-                    break;
-                }
+                
+                AddCurrentTetrominoToGameBoard();
+                break;
             }
         }
     }
@@ -193,7 +193,7 @@ public class Game
         GameLogicUpdates++;
         RemoveCurrentTetrominoFromGameBoard();
         if (!IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) =>
-                y + 1 < Program.CanvasHeight
+                y + 1 < BoardHeight
                 && !_gameBoard[x, y + 1]))
         {
             AddCurrentTetrominoToGameBoard();
@@ -222,7 +222,7 @@ public class Game
             }
 
             var clearRow = true;
-            for (var x = 0; x < Program.CanvasWidth; x++)
+            for (var x = 0; x < BoardWidth; x++)
             {
                 if (!_gameBoard[x, y])
                 {
@@ -235,7 +235,7 @@ public class Game
             {
                 for (; y > -1; y--)
                 {
-                    for (var x = 0; x < Program.CanvasWidth; x++)
+                    for (var x = 0; x < BoardWidth; x++)
                     {
                         if (y != 0)
                         {

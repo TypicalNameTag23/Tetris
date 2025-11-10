@@ -7,4 +7,13 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Reference Include="Painter">
+        <HintPath>..\..\Painter\Painter\bin\Release\net9.0\Painter.dll</HintPath>
+      </Reference>
+      <Reference Include="Taui">
+        <HintPath>..\..\Taui\Taui\bin\Release\net9.0\Taui.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>
