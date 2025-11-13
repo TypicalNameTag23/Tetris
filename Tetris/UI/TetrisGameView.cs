@@ -1,12 +1,11 @@
-using Painter;
-using Painter.Components;
+using System.Drawing;
 using Painter.Drawing;
-using Painter.Exceptions;
+using Painter.Widgets;
 using Tetris.Game;
 
 namespace Tetris.UI;
 
-public class TetrisGameView : IDrawable
+public class TetrisGameView : Widget
 {
     private const char EmptySpaceCharacter = '.';
     private const string GameWindowSizeTooSmallMessage = "Game window is too small.";
@@ -35,12 +34,12 @@ public class TetrisGameView : IDrawable
     }
     
     //todo: clean up this code
-    public void DrawOnto(Canvas canvas)
+    public override void Draw(Canvas canvas)
     {
         var y = 0;
         if (canvas.Width <= _tetrisGame.BoardWidth * 2 + 4 || canvas.Height <= _tetrisGame.BoardHeight + 2)
         {
-            DrawText(GameWindowSizeTooSmallMessage, canvas, y);
+            canvas.Draw(0, y, GameWindowSizeTooSmallMessage);
         }
         else
         {
@@ -52,69 +51,33 @@ public class TetrisGameView : IDrawable
                 {
                     if (x == 0)
                     {
-                        canvas.Draw(new Point(x + xOffset - 1, y + yOffset), new Pixel('>')
-                        {
-                            ForegroundColor = ConsoleColor.Green
-                        }); 
-                        canvas.Draw(new Point(x + xOffset - 2, y + yOffset), new Pixel('#')
-                        {
-                            ForegroundColor = ConsoleColor.Green
-                        }); 
+                        canvas.Draw(x + xOffset - 1, y + yOffset, ">", Color.DarkGreen); 
+                        canvas.Draw(x + xOffset - 2, y + yOffset, "#", Color.DarkGreen);
                     }
                     
                     if (x == _tetrisGame.BoardWidth * 2 - 2)
                     {
-                        canvas.Draw(new Point(x + xOffset + 2, y + yOffset), new Pixel('<')
-                        {
-                            ForegroundColor = ConsoleColor.Green
-                        }); 
-                        canvas.Draw(new Point(x + xOffset + 3, y + yOffset), new Pixel('#')
-                        {
-                            ForegroundColor = ConsoleColor.Green
-                        }); 
+                        canvas.Draw(x + xOffset + 2, y + yOffset, "<", Color.DarkGreen);
+                        canvas.Draw(x + xOffset + 3, y + yOffset, "#", Color.DarkGreen);
                     }
                     
                     if (_tetrisGame.GameBoard[x / 2, y])
                     {
-                        canvas.Draw(new Point(x + xOffset, y + yOffset), new Pixel('[')
-                        {
-                            ForegroundColor = ConsoleColor.DarkGreen
-                        });
-                        canvas.Draw(new Point(x + xOffset + 1, y + yOffset), new Pixel(']')
-                        {
-                            ForegroundColor = ConsoleColor.DarkGreen
-                        });
-                        
+                        canvas.Draw(x + xOffset, y + yOffset, "[", Color.DarkGreen);
+                        canvas.Draw(x + xOffset + 1, y + yOffset, "]", Color.DarkGreen);
                         continue;
                     }
 
-                    canvas.Draw(new Point(x + xOffset, y + yOffset), new Pixel(EmptySpaceCharacter)
-                    {
-                        ForegroundColor = ConsoleColor.DarkGray
-                    });
+                    
+                    canvas.Draw(x + xOffset, y + yOffset, ".", Color.DarkGray);
+                    canvas.Draw(x + xOffset + 1, y + yOffset, " ", Color.DarkGray);
                 }
             }
-            y--;
         }
-
-
-        DrawText($"FPS: {_framesPerSecond} | GLUPS: {_tetrisGame.GameLogicUpdatesPerSecond}", canvas, canvas.Height - 2);
-        DrawText($"W: {Console.BufferWidth} | H: {Console.BufferHeight}", canvas, canvas.Height - 1);
+        
+        canvas.Draw(0, canvas.Height - 2, $"FPS: {_framesPerSecond} | GLUPS: {_tetrisGame.GameLogicUpdatesPerSecond}");
+        canvas.Draw(0, canvas.Height - 1, $"W: {Console.BufferWidth} | H: {Console.BufferHeight}");
         _frameCount++;
     }
-
-    private void DrawText(string text, Canvas canvas, int y = 0, ConsoleColor? textColor = null)
-    {
-        try // hack workaround to stop drawing outside of canvas
-        {
-            for (var x = 0; x < text.Length; x++)
-            {
-                canvas.Draw(new Point(x, y), new Pixel(text[x])
-                {
-                    ForegroundColor = textColor
-                });
-            }
-        }
-        catch (PainterException) { /* ignored */ }
-    }
+    
 }
