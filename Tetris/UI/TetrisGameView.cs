@@ -1,45 +1,27 @@
 using System.Drawing;
 using Painter.Drawing;
-using Painter.Widgets;
+using Painter.Elements;
 using Tetris.Game;
 
 namespace Tetris.UI;
 
-public class TetrisGameView : Widget
+public class TetrisGameView : Element
 {
-    private const char EmptySpaceCharacter = '.';
-    private const string GameWindowSizeTooSmallMessage = "Game window is too small.";
-    
-    private static int _frameCount;
-    private static int _framesPerSecond;
     private TetrisGame _tetrisGame;
 
-    public TetrisGameView()
+    public TetrisGameView(TetrisGame tetrisGame)
     {
-        _tetrisGame = new TetrisGame();
-        new Thread(() =>
-        {
-            while (true)
-            {
-                Thread.Sleep(1000);
-                _framesPerSecond = _frameCount;
-                _frameCount = 0;
-
-                _tetrisGame.GameLogicUpdatesPerSecond = _tetrisGame.GameLogicUpdates;
-                _tetrisGame.GameLogicUpdates = 0;
-            }
-        }).Start();
-        
-        _tetrisGame.Start();
+        _tetrisGame = tetrisGame;
+        _tetrisGame.OnGameUpdateEvent += Redraw;
     }
     
     //todo: clean up this code
-    public override void Draw(Canvas canvas)
+    protected override void DrawElement(Canvas canvas, bool force)
     {
         var y = 0;
         if (canvas.Width <= _tetrisGame.BoardWidth * 2 + 4 || canvas.Height <= _tetrisGame.BoardHeight + 2)
         {
-            canvas.Draw(0, y, GameWindowSizeTooSmallMessage);
+            canvas.Draw(0, canvas.Height - 1, "Game window is too small.");
         }
         else
         {
@@ -75,9 +57,9 @@ public class TetrisGameView : Widget
             }
         }
         
-        canvas.Draw(0, canvas.Height - 2, $"FPS: {_framesPerSecond} | GLUPS: {_tetrisGame.GameLogicUpdatesPerSecond}");
-        canvas.Draw(0, canvas.Height - 1, $"W: {Console.BufferWidth} | H: {Console.BufferHeight}");
-        _frameCount++;
+        // canvas.Draw(0, canvas.Height - 2, $"FPS: {_framesPerSecond} | GLUPS: {_tetrisGame.GameLogicUpdatesPerSecond}");
+        // canvas.Draw(0, canvas.Height - 1, $"W: {Console.BufferWidth} | H: {Console.BufferHeight}");
+        // _frameCount++;
     }
     
 }

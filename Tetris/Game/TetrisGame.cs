@@ -1,5 +1,6 @@
 using System.Reflection.Metadata.Ecma335;
 using Painter;
+using Tetris.Pieces;
 
 namespace Tetris.Game;
 
@@ -7,6 +8,7 @@ public class TetrisGame
 {
     public int BoardWidth { get; }
     public int BoardHeight { get; }
+    public event GameUpdateEvent? OnGameUpdateEvent;
     private const int MillisBetweenGravityMovements = 1000;
     private static readonly bool[][,] TetrinoLayouts =
     [
@@ -56,7 +58,7 @@ public class TetrisGame
 
     private readonly bool[,] _gameBoard;
     private GameState _gameState = GameState.Inactive;
-    private Pieces.Tetromino _currentTetrino;
+    private Tetromino _currentTetrino;
     private Timer _gravityTimer;
     private Random _random;
 
@@ -70,10 +72,6 @@ public class TetrisGame
     }
     
     public bool[,] GameBoard => _gameBoard;
-    
-    public int GameLogicUpdates { get; set; }
-
-    public int GameLogicUpdatesPerSecond { get; set; }
     
     /// <summary>
     /// Starts the game if it isn't currently active.
@@ -105,7 +103,6 @@ public class TetrisGame
             return;
         }
         
-        GameLogicUpdates++;
         switch (key.Key)
         {
             case ConsoleKey.RightArrow:
@@ -180,6 +177,8 @@ public class TetrisGame
                 break;
             }
         }
+        
+        OnGameUpdateEvent?.Invoke();
     }
 
     /// <summary>
@@ -187,7 +186,6 @@ public class TetrisGame
     /// </summary>
     private void Gravity()
     {
-        GameLogicUpdates++;
         RemoveCurrentTetrominoFromGameBoard();
         if (!IsValidPosition(_currentTetrino.RelativeBlockLayout, (x, y) =>
                 y + 1 < BoardHeight
@@ -202,6 +200,8 @@ public class TetrisGame
             _currentTetrino.Y++;
             AddCurrentTetrominoToGameBoard();
         }
+        
+        OnGameUpdateEvent?.Invoke();
     }
 
     /// <summary>
